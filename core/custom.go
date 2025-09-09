@@ -157,6 +157,16 @@ func ThemeScroll(choices []choose.Choice, cursor int) string {
 	start := 0
 	end := limit
 
+	// Calculate the max width of choices for alignment
+	maxWidth := 0
+	for _, choice := range choices {
+		if len(choice.Text) > maxWidth {
+			maxWidth = len(choice.Text)
+		}
+	}
+	// Add space for bullet and padding
+	maxWidth += 3
+
 	// Create a slice of items to display
 	if numChoices > limit {
 		if index < limit/2 {
@@ -172,6 +182,10 @@ func ThemeScroll(choices []choose.Choice, cursor int) string {
 		}
 	}
 
+	// Determine if we need scroll indicators
+	showUpArrow := start > 0
+	showDownArrow := end < numChoices
+
 	// Loop through the slice and display each item.
 	// We will determine if the item is selected or not by calling isSelected
 	// with the index of the item, but since we're only displaying a slice of
@@ -180,12 +194,47 @@ func ThemeScroll(choices []choose.Choice, cursor int) string {
 		// Check if the item is the one at the cursor's location
 		isCursor := index == i
 
+		var lineText string
 		if isCursor {
-			s.WriteString(constants.DefaultSelectedItemStyle.Render(fmt.Sprintf("• %s", choice.Text)))
+			lineText = fmt.Sprintf("• %s", choice.Text)
 		} else {
-			s.WriteString(constants.DefaultItemStyle.Render(fmt.Sprintf("  %s", choice.Text)))
+			lineText = fmt.Sprintf("  %s", choice.Text)
 		}
 
+		// Pad the line to align scroll indicators
+		padding := maxWidth - len(lineText)
+		if padding > 0 {
+			lineText += strings.Repeat(" ", padding)
+		}
+
+		// Add scroll indicators on the right
+		var scrollIndicator string
+		if i == 0 && showUpArrow {
+			scrollIndicator = "▲"
+		} else if i == len(choices[start:end])-1 && showDownArrow {
+			scrollIndicator = "▼"
+		} else if showUpArrow || showDownArrow {
+			scrollIndicator = "┃"
+		}
+
+		if scrollIndicator != "" {
+			lineText += " " + constants.DefaultNoteStyle.Render(scrollIndicator)
+		}
+
+		if isCursor {
+			s.WriteString(constants.DefaultSelectedItemStyle.Render(lineText))
+		} else {
+			s.WriteString(constants.DefaultItemStyle.Render(lineText))
+		}
+
+		s.WriteString("\n")
+	}
+
+	// Add position counter at the bottom
+	if numChoices > 1 {
+		s.WriteString("\n")
+		counter := fmt.Sprintf("(%d/%d)", cursor+1, numChoices)
+		s.WriteString(constants.DefaultNoteStyle.Render(counter))
 		s.WriteString("\n")
 	}
 

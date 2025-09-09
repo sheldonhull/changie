@@ -414,9 +414,9 @@ func TestThemeScrollWithMoreThan10ChoicesCursorInMiddle(t *testing.T) {
 	then.True(t, strings.Contains(result, "  Option 3"))
 	then.True(t, strings.Contains(result, "• Option 8"))
 	then.True(t, strings.Contains(result, "  Option 12"))
-	// Verify the range is correct by checking that we have exactly 10 options
+	// Verify the range is correct by checking that we have exactly 10 options + 2 additional lines (blank + counter)
 	lines := strings.Split(strings.TrimSpace(result), "\n")
-	then.Equals(t, 10, len(lines))
+	then.Equals(t, 12, len(lines)) // 10 options + 1 blank line + 1 counter line
 }
 
 func TestThemeScrollWithMoreThan10ChoicesCursorAtEnd(t *testing.T) {
@@ -431,9 +431,9 @@ func TestThemeScrollWithMoreThan10ChoicesCursorAtEnd(t *testing.T) {
 	then.True(t, strings.Contains(result, "  Option 6"))
 	then.True(t, strings.Contains(result, "• Option 14"))
 	then.True(t, strings.Contains(result, "  Option 15"))
-	// Verify the range is correct by checking that we have exactly 10 options
+	// Verify the range is correct by checking that we have exactly 10 options + 2 additional lines (blank + counter)
 	lines := strings.Split(strings.TrimSpace(result), "\n")
-	then.SliceLen(t, 10, lines)
+	then.SliceLen(t, 12, lines) // 10 options + 1 blank line + 1 counter line
 }
 
 func TestThemeScrollWithMoreThan10ChoicesCursorAtVeryEnd(t *testing.T) {
@@ -498,8 +498,8 @@ func TestThemeScrollLimitCalculation(t *testing.T) {
 
 	result5 := ThemeScroll(choices5, 0)
 	lines5 := strings.Split(strings.TrimSpace(result5), "\n")
-	// Should have 5 lines (one for each choice)
-	then.SliceLen(t, 5, lines5)
+	// Should have 7 lines (5 choices + 1 blank line + 1 counter line)
+	then.SliceLen(t, 7, lines5)
 
 	// Test with 15 choices
 	choices15 := make([]choose.Choice, 15)
@@ -509,6 +509,6 @@ func TestThemeScrollLimitCalculation(t *testing.T) {
 
 	result15 := ThemeScroll(choices15, 0)
 	lines15 := strings.Split(strings.TrimSpace(result15), "\n")
-	// Should have 10 lines (limited by min(10, 15))
-	then.SliceLen(t, 10, lines15)
+	// Should have 12 lines (10 choices + 1 blank line + 1 counter line, limited by min(10, 15))
+	then.SliceLen(t, 12, lines15)
 }
